@@ -6,7 +6,7 @@
 @date:
 - created on 2025-05-16
 - updated on 2025-06-07
-@version: 0.2.0
+@version: 0.2.1
 +++
 
 # TL;DR
@@ -14,7 +14,7 @@
 This post describes a minimalist approach to build a personal blog site without using any static site generator (like [Hugo] or [Jekyll]) or content management system (like [WordPress]).
 Instead, contents are written in plain text using a custom, lightweight markup format, then converted into HTML files using a user-defined PowerShell script.
 The generated HTML files are organized manually and deployed to [GitHub Pages] via a simple, transparent [GitHub Actions] workflow.
-This method offers complete control over the site’s structure, styling, and deployment, favoring simplicity and clarity over convenience and abstraction.
+This method offers complete control over the site's structure, styling, and deployment, favoring simplicity and clarity over convenience and abstraction.
 
 # Method
 
