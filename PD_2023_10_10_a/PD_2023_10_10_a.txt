@@ -5,10 +5,12 @@
 @brief: This is part 1 of a tutorial on Git, in documentary fiction style.
 @date:
 - created on 2023-10-10
-- updated on 2025-05-25
+- updated on 2025-07-01
 @tag: [git, fiction]
-@version: 0.1.1
+@version: 0.1.2
 +++
+
+# Git in Practice | Day One: Ice Breaking
 
 You are a fresh software engineer, joining a startup company in surgical robotics called PDX.
 Today marks your entrance into this new field. You meet your colleagues and, of course, the code.

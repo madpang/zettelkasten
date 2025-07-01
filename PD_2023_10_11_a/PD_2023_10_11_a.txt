@@ -4,11 +4,13 @@
 @author: madpang
 @brief: This is part 2 of a tutorial on Git, in documentary fiction style.
 @date:
-- 2023-10-11
-- 2023-10-12
+- created on 2023-10-11
+- updated on 2025-07-01
 @tag: [git, fiction]
-@version: 0.1.0
+@version: 0.1.1
 +++
+
+# Git in Practice | Day Two: Odyssey
 
 While yesterday's work laid a solid foundation, you're still uneasy about the slightly under-maintained shrubbery-like codebase.
 Today's goal is to pave the way for implanting your new feature into *IMAGINE*.
@@ -87,7 +89,6 @@ Aha! A lifeline! After a frantic web search, you discover that you can reapply t
 You also learn that once a stash is dropped, it becomes "dangling" and might be scooped up by Git's garbage collector. Time is of the essence! Act swiftly, basically before you even think of closing that terminal.
 
 Disaster averted, rear end saved. Now, you'd better skedaddle and grab some coffee.
-
 
 ## 13:30 | A Side Walk
 
