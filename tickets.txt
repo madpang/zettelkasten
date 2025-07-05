@@ -1,0 +1,50 @@
++++ header
+@file: zettelkasten/tickets.txt
++++
+
+=== Ticket 1
+
+@brief: Write about Linux-based server setup.
+
+@status: TODO
+
+@date:
+- created on 2025-07-04
+- updated on 2025-07-04
+
+@details:
+Linux-based server setup is a common task in software development and deployment.
+In modern development, it may present itself as docker container setup, or as a virtual machine setup, etc.
+Based on different use cases, the setup may have different emphasis.
+
+=== Ticket 2
+
+@brief: Write about the use of Git
+
+@status: IN-PROGRESS
+
+@date:
+- created on 2025-07-04
+- updated on 2025-07-04
+
+@details:
+Git is essential in modern software development.
+There are already plenty of resources on the web about Git.
+However, `git` has grown to be a complex tool, and it is not uncommon that even experienced developers sometimes forget how to achieve a specific task with it.
+I would like to write a series of posts about Git, in documentary fiction style, to cover the frequent practical usage scenarios of Git.
+Moreover, I would like to explore the concept of version control in more depth.
+
+=== Ticket 3
+
+@brief: Write about some CLI tips
+
+@status: TODO
+
+@date:
+- created on 2025-07-04
+- updated on 2025-07-04
+
+@details:
+Want to find a file in a directory tree by its name?
+What to find a text file by several keywords in it?
+etc.
