@@ -48,3 +48,19 @@ Moreover, I would like to explore the concept of version control in more depth.
 Want to find a file in a directory tree by its name?
 What to find a text file by several keywords in it?
 etc.
+
+=== Ticket 4
+
+@brief: Write about Java development with Gradle.
+
+@status: TODO
+
+@date:
+- created on 2025-07-06
+- updated on 2025-07-06
+
+@details:
+Java is a popular programming language.
+It is a mature language, and has a large ecosystem, and a long history.
+Many developers may thought that Java is a little bit old-fashioned, but with the rise of the AI agent/copilot, I think that Java will benefit from it.
+Gradle, well, honest to say, I am new to gradle---I am a C++ developer who has been using CMake for years---I thought that Gradle is a modern build system for Java.
