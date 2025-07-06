@@ -6,11 +6,11 @@
 
 @brief: Write about Linux-based server setup.
 
-@status: TODO
+@status: IN-PROGRESS
 
 @date:
 - created on 2025-07-04
-- updated on 2025-07-04
+- updated on 2025-07-07
 
 @details:
 Linux-based server setup is a common task in software development and deployment.
