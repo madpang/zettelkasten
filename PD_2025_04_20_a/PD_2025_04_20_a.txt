@@ -1,16 +1,16 @@
 +++ header
 @file: zettelkasten/PD_2025_04_20_a/PD_2025_04_20_a.txt
-@title: Setting up a Ubuntu based server
+@title: Setup up a Ubuntu based server | Storage Configuration
 @author: madpang
 @brief: Configure Ubuntu Server 24.04 LTS on a Dell Precision T7910 Workstation.
 @date:
 - created on 2025-04-20
-- updated on 2025-05-03
+- updated on 2025-07-13
 @tags: [ubuntu, server, dell, workstation]
 @version: 0.2.0
 +++
 
-# Setting up a Ubuntu based server
+# Setup up a Ubuntu based Server | Storage Configuration
 
 ## Introduction
 
@@ -142,7 +142,7 @@ A server should be stable; however, technology evolves rapidly, and sometimes I 
 The storage configuration is straightforward:
 +++ console
 # create a primary partition spanning the entire space of a SSD disk
-> sudo parted /dev/sda --script mklabel gptq mkpart ext4part ext4 0% 100%
+> sudo parted /dev/sda --script mklabel gpt mkpart ext4part ext4 0% 100%
 # create an `ext` Extended file system on it
 sudo mkfs.ext4 /dev/sda1
 +++
@@ -212,9 +212,9 @@ The meaning of the options is:
 - `progress`: shows file-level copy progress.
 - `stats`: provide a summary at the end of operation.
 
-### Configure the swap area
+### Configure the SWAP area
 
-Swap is a space on a storage device---e.g. a SSD---that is used as virtual memory when a system's physical RAM is fully utilized.
+*SWAP* is a space on a storage device---e.g. a SSD---that is used as virtual memory when a system's physical RAM is fully utilized.
 It acts as an overflow area for data that cannot fit into RAM, allowing the system to continue running even when memory is low.
 
 The main scenarios for using swap are:
@@ -254,10 +254,10 @@ To create a swap partition (note, I enabled LVM during the installation):
 +++
 
 To make the new swap setup persistent across reboots, update the `/etc/fstab` file (use `sudo nano` to edit):
-+++ plain-text
++++ config-file
 # ...
 # delete this line -> /dev/ubuntu-vg/swap-lv none swap sw 0 0
-# add the following line >>>
+# >>> add the following line
 /dev/disk/by-id/<replace-with-your-id> none swap sw 0 0
 # <<<
 +++
@@ -265,8 +265,19 @@ To make the new swap setup persistent across reboots, update the `/etc/fstab` fi
 ## Discussion
 
 @todo: add some notes, about identify the PHYSICAL disk, Or maybe use a dedicated article
+## Extra Notes
+
+The following command uses `parted` to create a new partition table and a primary partition on the specified disk.
++++ cmd
+sudo parted /dev/sdb --script mklabel gpt mkpart ext4part ext4 0% 100%
+```
+The `--script` flag tells parted to run in non-interactive mode, executing all commands without prompting for user confirmation.
+The `mklabel gpt` command creates a new GPT (GUID Partition Table) on the disk, and the `mkpart ext4part ext4 0% 100%` command creates a primary partition that spans the entire disk, formatted as an ext4 filesystem (labeled as `ext4part`).
 
 ## References
+
+1. [Canonical Ubuntu Tutorial: Install Ubuntu Server](https://ubuntu.com/tutorials/install-ubuntu-server#1-overview)(accessed on 2025-07-12)
+2. [DigitalOcean Tutorial: How To Configure RAID Arrays on Ubuntu](https://www.digitalocean.com/community/tutorials/how-to-create-raid-arrays-with-mdadm-on-ubuntu)(accessed on 2025-07-12)
 
 ## Appendix
 
@@ -314,59 +325,4 @@ It is an old machine but still powerful enough for my needs.
 When change OS, and re-mount the RAID array
 @todo:
 
---- Tips: check IP after server instllation to ease SSH.
-
---- Consideration
-
-Note, I opted not to use the LVM snapshot feature provided by the OS, prioritizing greater control and simplicity instead.
-
---- Command explanation
-
-+++
-sudo parted /dev/sdb --script mklabel gpt mkpart ext4part ext4 0% 100%
-+++
-
---- Add label to disk
-
-## Steps
-
-0. install OpenSSH server
-1. `hostname -I`  get your LAN IP
-2. ssh into it
-3. apt update & upgrade
-4. sudo apt install avahi-daemon
-
-sudo apt install -y openssh-server
-
-sudo apt install -y \
-	avahi-daemon
-	tmux
-
-## Set XRDP
-
-# install
-sudo apt install xfce4 xfce4-goodies xrdp
-
-# config
-sudo adduser xrdp ssl-cert
-echo 'xfce4-session' > ~/.xsession
-
-# start
-sudo systemctl enable xrdp
-sudo systemctl start xrdp
-# or use `sudo systemctl restart xrdp` if setting changes
-
-# monitor
-sudo systemctl status xrdp
-
-# turn off Wi-Fi
-nmcli radio wifi off
-
-# install firefox
-
---- Trouble shooting
-./bin/glnxa64/MATLABWindow
-./bin/glnxa64/MATLABWindow: error while loading shared libraries: libgtk-x11-2.0.so.0: cannot open shared object file: No such file or directory
-
-@see: https://github.com/mohammaddehnavi/mohi-docs/blob/main/Matlab/README.md#fix-install-matlab
--> no go, get MATLAB 2025a
+--- Tips: check IP after server installation to ease SSH.
