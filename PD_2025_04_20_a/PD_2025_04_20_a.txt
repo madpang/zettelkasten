@@ -6,7 +6,7 @@
 @date:
 - created on 2025-04-20
 - updated on 2025-07-13
-@tags: [ubuntu, server, dell, workstation]
+@tags: [ubuntu, server, workstation, ugreen, dell]
 @version: 0.2.0
 +++
 
@@ -87,25 +87,20 @@ Just remember to enable the LVM option.
 Before the RAID setup, the storage layout looks like this:
 +++ console
 > lsblk -o NAME,SIZE,FSTYPE,TYPE,MOUNTPOINT
-NAME                           SIZE FSTYPE      TYPE MOUNTPOINT
+NAME          SIZE    FSTYPE     TYPE    MOUNTPOINT
 # ...
-nvme0n1                      953.9G             disk 
-nvme2n1                      953.9G             disk 
-nvme1n1                      953.9G             disk 
-nvme3n1                      953.9G             disk 
+nvme0n1       953.9G             disk 
+nvme2n1       953.9G             disk 
+nvme1n1       953.9G             disk 
+nvme3n1       953.9G             disk 
 +++
 
 I choose to set up a *RAID 10* array using the four NVMe disks, because:
 - RAID 1 provides high reliability through mirroring;
 - RAID 0 increases speed and capacity via striping;
 - RAID 10 combines both advantages.
-The arrangement of RAID 10 is illustrated in [fig.1].
-<figure id="fig.1">
-    <img src="assets/RAID10.gig">
-    <figcaption>RAID 10 arrangement</figcaption>
-</figure>
 
-Use `mdadm` to create the RAID array:
+To start, use `mdadm` to create the RAID array:
 +++ console
 # create a primary partition spanning the entire space for each NVMe disk
 > for i in {0..3}; do sudo parted /dev/nvme${i}n1 --script mklabel gpt mkpart primary 0% 100% set 1 raid on; done
@@ -262,17 +257,55 @@ To make the new swap setup persistent across reboots, update the `/etc/fstab` fi
 # <<<
 +++
 
-## Discussion
+### Configure the system to use the new storage layout
 
-@todo: add some notes, about identify the PHYSICAL disk, Or maybe use a dedicated article
+To ensure that the new storage layout is used after reboot---i.e., automatically mounted---update the `/etc/fstab` file (use `sudo nano` to edit):
++++ config-file
+# /etc/fstab: static file system information.
+#
+# Use 'blkid' to print the universally unique identifier for a
+# device; this may be used with UUID= as a more robust way to name devices
+# that works even if disks are added and removed. See fstab(5).
+#
+# <file system> <mount point> <type> <options> <dump>  <pass>
+/dev/disk/by-id/<replace-with-your-device-id> / ext4 defaults 0 1
+/dev/disk/by-id/dm-name-ubuntu--vg-swap--lv none swap sw 0 0
+/dev/disk/by-uuid/<replace-with-your-device-uuid> /boot ext4 defaults 0 1
+/dev/disk/by-uuid/<replace-with-your-device-uuid> /boot/efi vfat defaults 0 1
+/dev/disk/by-uuid/<replace-with-your-device-uuid> /mnt/backup ext4 defaults,nofail 0 2
+/dev/disk/by-uuid/<replace-with-your-device-uuid> /mnt/timemachine ext4 defaults,nofail 0 2
+/dev/disk/by-uuid/<replace-with-your-device-uuid> /mnt/workspace ext4 defaults,nofail 0 2
++++
+
 ## Extra Notes
+
+### Tips on OS installation on a headless server
+
+When working with a headless machine---not yet has an OS installed---the initial hurdle is how to handle the interactive installation process.
+A keyboard is portable and is enough for the input, but a monitor is not---although there are many sort of portable monitors available, but still not convenient, some of them requires additional power supply, while some of them support USB-C video/power delivery but the server side may not support it.
+I find a better solution is to use a minimal capture card---an integrated device that has accepts HDMI signal output from the server and delivers to the host machine via USB connection ---for example, I use such a device from [UGREEN].
+The minimal capture card may not be powerful enough for time time use due to thermal issue, but is especially fit for the server installation work, since you usually want to carry your own laptop.
+
+Once the OS is installed, you can go on with your cozy SSH connection---Ubuntu server usually has OpenSSH server installed by default, if not, you can install it with:
++++ cmd
+# install & launch ssh server
+sudo apt install -y openssh-server
+sudo systemctl enable ssh
+sudo systemctl start ssh
++++
+If you do not manually configure the IP address of the server, you can find it by `hostname -I`.
+
+### Explanation of the some commands
 
 The following command uses `parted` to create a new partition table and a primary partition on the specified disk.
 +++ cmd
 sudo parted /dev/sdb --script mklabel gpt mkpart ext4part ext4 0% 100%
 ```
 The `--script` flag tells parted to run in non-interactive mode, executing all commands without prompting for user confirmation.
-The `mklabel gpt` command creates a new GPT (GUID Partition Table) on the disk, and the `mkpart ext4part ext4 0% 100%` command creates a primary partition that spans the entire disk, formatted as an ext4 filesystem (labeled as `ext4part`).
+The `mklabel gpt` command creates a new GPT (GUID Partition Table) on the disk, and the `mkpart ext4part ext4 0% 100%` command creates a primary partition that spans the entire disk, formatted as an ext4 filesystem, labeled as `ext4part`.
+Note:
+- the `ext4part` parameter is just a label for the partition, and it can be set to any name you choose, and you can see it by by command such as `sudo parted /dev/sdb print`; but it is not important for the partition to function so people usually just use the generic name `ext4part`.
+- the `ext4` parameter here only sets the partition type flag---it does not actually format the partition with ext4---you need a separate `mkfs.ext4` command to create the filesystem.
 
 ## References
 
@@ -317,12 +350,3 @@ It is equipped with:
 - 2x 2TB SSD disks (Crucial and SanDisk);
 - 1x 2TB HDD disk (Toshiba);
 It is an old machine but still powerful enough for my needs.
-
-## Tips
-
---- Tips
-
-When change OS, and re-mount the RAID array
-@todo:
-
---- Tips: check IP after server installation to ease SSH.
