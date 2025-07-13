@@ -7,7 +7,7 @@
 - created on 2023-10-11
 - updated on 2025-07-01
 @tag: [git, fiction]
-@version: 0.1.1
+@version: 0.1.2
 +++
 
 # Git in Practice | Day Two: Odyssey

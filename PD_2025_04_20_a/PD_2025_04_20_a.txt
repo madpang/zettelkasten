@@ -7,7 +7,7 @@
 - created on 2025-04-20
 - updated on 2025-07-13
 @tags: [ubuntu, server, workstation, ugreen, dell]
-@version: 0.2.0
+@version: 0.2.1
 +++
 
 # Setup up a Ubuntu based Server | Storage Configuration
@@ -300,7 +300,7 @@ If you do not manually configure the IP address of the server, you can find it b
 The following command uses `parted` to create a new partition table and a primary partition on the specified disk.
 +++ cmd
 sudo parted /dev/sdb --script mklabel gpt mkpart ext4part ext4 0% 100%
-```
++++
 The `--script` flag tells parted to run in non-interactive mode, executing all commands without prompting for user confirmation.
 The `mklabel gpt` command creates a new GPT (GUID Partition Table) on the disk, and the `mkpart ext4part ext4 0% 100%` command creates a primary partition that spans the entire disk, formatted as an ext4 filesystem, labeled as `ext4part`.
 Note:
