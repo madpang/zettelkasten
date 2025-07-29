@@ -1,0 +1,15 @@
+``` header
+@file: zettelkasten/PD_2025_07_30_a/PD_2025_07_30_a.txt
+@title: Setup NFS Server on a Ubuntu Machine
+@author: madpang
+@brief: A guide on how to setup a NFS server on a Ubuntu machine, and how to mount it from a macOS client.
+@date: [created: 2025-07-30, updated: 2025-07-30]
+@tag: [nfs, ubuntu, macos]
+@version: 0.1.0
+```
+
+# Setup NFS Server for Local Network File Sharing
+
+My workflow involves a multi-workspace setup, where I usually works on a MacBook Pro as *THE TERMINAL*---enjoying its *Liquid Retina XDR* display and the aesthetic of macOS for coding, writing, and graphic design---while using a Linux machine as the server for heavy lifting tasks, such as long-run simulation, batch data processing, machine learning, etc.
+
+This guide provides steps to set up a Network File System (NFS) server on a Ubuntu machine and how to mount it from a macOS client.
