@@ -110,6 +110,9 @@ You can add an entry to the `/etc/fstab` file to ensure this:
 echo "192.168.1.100:/mnt/workspace/share /mnt/nfs_share nfs defaults 0 0" | sudo tee -a /etc/fstab
 ```
 
+A small tip: you can use the command `showmount -e <nfs-server-address>` from the client to check the available NFS shares on the server.
+This even works with `showmount -e localhost` on the server itself to verify the NFS is correctly configured.
+
 ## Conclusion
 
 Setting up an NFS server on a Ubuntu machine and connecting to it from macOS or Ubuntu clients is straightforward.
