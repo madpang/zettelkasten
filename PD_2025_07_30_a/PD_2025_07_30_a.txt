@@ -59,3 +59,22 @@ NOTE, it you have a firewall enabled, you may need to allow NFS traffic:
 sudo ufw allow from 192.168.1.0/24 to any port nfs
 sudo ufw reload
 ```
+
+## Connect to the NFS Shared Directory from Clients
+
+### Connect from macOS
+
+You can mount an NFS share from macOS---macOS includes built-in support for NFS:
+``` bash
+sudo mount -t nfs -o resvport 192.168.1.100:/mnt/workspace/share /mnt/nfs_share
+```
+
+To unmount:
+```
+sudo umount /mnt/nfs_share
+```
+
+NOTE, the command `mount -t nfs -o resvport ...` is equivalent to `mount_nfs -P ...`, where the `-P` option tells the NFS client to use of a privileged source port ($< 1024$), which many NFS servers (especially Linux-based ones) require for security.
+However, the latter one---`mount_nfs -P` is NOT documented in the manpage, for better code maintainability, you should prefer using the former command.
+
+Since I usually use my MacBook Pro as a portable work terminal, I often do not configure persistence on-boot mount, rather I would like to create some wrapper utilities to help automate the mount/unmount task---for example, have a look at [ohmypwsh](https://github.com/madpang/ohmypwsh).
