@@ -5,7 +5,7 @@
 @brief: A guide on how to setup a NFS server on a Ubuntu machine, and how to mount it from a macOS client.
 @date: [created: 2025-07-30, updated: 2025-08-02]
 @tag: [nfs, ubuntu, macos]
-@version: 0.1.0
+@version: 0.6.0
 ```
 
 # Setup NFS Server for Local Network File Sharing
@@ -78,3 +78,31 @@ NOTE, the command `mount -t nfs -o resvport ...` is equivalent to `mount_nfs -P 
 However, the latter one---`mount_nfs -P` is NOT documented in the manpage, for better code maintainability, you should prefer using the former command.
 
 Since I usually use my MacBook Pro as a portable work terminal, I often do not configure persistence on-boot mount, rather I would like to create some wrapper utilities to help automate the mount/unmount task---for example, have a look at [ohmypwsh](https://github.com/madpang/ohmypwsh).
+
+### Connect from Ubuntu
+
+To connect to a NFS server from a Ubuntu client, you first need to install NFS client software:
+``` bash
+sudo apt install nfs-common
+```
+
+Then mount the shared directory:
+``` bash
+sudo mount 192.168.1.100:/mnt/workspace/share /mnt/nfs_share
+```
+
+To unmount:
+```
+sudo umount /mnt/nfs_share
+```
+
+In a real world company project, your team may have a central NFS server, and you may want to mount the NFS share automatically at boot time.
+You can add an entry to the `/etc/fstab` file to ensure this:
+``` bash
+echo "192.168.1.100:/mnt/workspace/share /mnt/nfs_share nfs defaults 0 0" | sudo tee -a /etc/fstab
+```
+
+## Conclusion
+
+Setting up an NFS server on a Ubuntu machine and connecting to it from macOS or Ubuntu clients is straightforward.
+This setup allows for efficient and consistent multi-workspace workflows.
