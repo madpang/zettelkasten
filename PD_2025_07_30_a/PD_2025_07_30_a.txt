@@ -5,7 +5,7 @@
 @brief: A guide on how to setup a NFS server on a Ubuntu machine, and how to mount it from a macOS client.
 @date: [created: 2025-07-30, updated: 2025-08-02]
 @tag: [nfs, ubuntu, macos]
-@version: 0.7.0
+@version: 1.0.0
 ```
 
 # Setup NFS Server for Local Network File Sharing
@@ -27,7 +27,6 @@ sudo apt install nfs-kernel-server
 2. Create the directory to share
 ``` cmd @server
 sudo mkdir -p /mnt/workspace/share
-sudo mkdir -p /mnt/workspace/share
 ```
 
 3. Set the appropriate permissions for the shared directory:
@@ -36,9 +35,9 @@ sudo chown $USER:$USER /mnt/workspace/share
 ```
 
 4. Configure the NFS exports by editing the `/etc/exports` file:
-# replace `192.168.1.0/24` with your actual network):
+# replace `192.168.1.0/24` with your actual network
 ``` cmd @server
-echo "/mnt/workspace/share 192.168.1.0/24(rw,sync,no_subtree_check)" |  sudo tee -a /etc/exports
+echo "/mnt/workspace/share 192.168.1.0/24(rw,sync,all_squash,no_subtree_check,anonuid=1000,anongid=1000)" |  sudo tee -a /etc/exports
 ```
 
 5. Export the shared directory:
@@ -57,6 +56,17 @@ If you have a firewall enabled, you may need to allow NFS traffic:
 sudo ufw allow from 192.168.1.0/24 to any port nfs
 sudo ufw reload
 ```
+
+NOTE, many tutorials may suggest set the permission of the shared directory as
+``` cmd @server
+sudo chown nobody:nogroup /mnt/workspace/share
+sudo chmod 777 /mnt/workspace/share
+```
+but I think it is more convenient to just use a *common* non-root user on the server to manage the shared directory.
+The use of `all_squash` option maps all user requests to the anonymous user, which would default to `nobody:nogroup`, but is set specifically to `anonuid:anongid`.
+
+This is suitable for a one-man multi-workspace setup, or a small team that does not want tangle with user permission issues.
+However, if you need fine-grained access control, you may want to reconsider the permission policy or even you would better consider using a protocol other than NFS.
 
 ## Connect to the NFS Shared Directory from Clients
 
