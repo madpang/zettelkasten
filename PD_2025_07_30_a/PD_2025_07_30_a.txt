@@ -3,7 +3,7 @@
 @title: Setup NFS Server on a Ubuntu Machine
 @author: madpang
 @brief: A guide on how to setup a NFS server on a Ubuntu machine, and how to mount it from a macOS client.
-@date: [created: 2025-07-30, updated: 2025-07-30]
+@date: [created: 2025-07-30, updated: 2025-08-02]
 @tag: [nfs, ubuntu, macos]
 @version: 0.1.0
 ```
@@ -13,3 +13,49 @@
 My workflow involves a multi-workspace setup, where I usually works on a MacBook Pro as *THE TERMINAL*---enjoying its *Liquid Retina XDR* display and the aesthetic of macOS for coding, writing, and graphic design---while using a Linux machine as the server for heavy lifting tasks, such as long-run simulation, batch data processing, machine learning, etc.
 
 This guide provides steps to set up a Network File System (NFS) server on a Ubuntu machine and how to mount it from a macOS client.
+
+## Configure Directories Sharing on the Server
+
+Suppose you are logging to the Ubuntu server as a non-root user---with *uid* `1000` and *gid* `1000`, and with sudo privilege---and you want to share a directory located at `/mnt/workspace/share` with your local network.
+
+1. Install the NFS server package on the Ubuntu machine:
+``` bash
+sudo apt update
+sudo apt install nfs-kernel-server
+```
+
+2. Create the directory to share
+```bash
+sudo mkdir -p /mnt/workspace/share
+```
+
+3. Set the appropriate permissions for the shared directory:
+```bash
+sudo chown $USER:$USER /mnt/workspace/share
+```
+
+4. Configure the NFS exports by editing the `/etc/exports` file:
+   ```bash
+   sudo nano /etc/exports
+   ```
+   Add the following line to share the directory with the local network (replace `192.168.1.0/24` with your actual network):
+   ```
+   /mnt/workspace/share 192.168.1.0/24(rw,sync,no_subtree_check)
+   ```
+
+5. Export the shared directory:
+   ```bash
+   sudo exportfs -ra
+   ```
+
+6. Start the NFS server:
+   ```bash
+   sudo systemctl enable nfs-server
+   sudo systemctl start nfs-kernel-server
+   ```
+
+NOTE, it you have a firewall enabled, you may need to allow NFS traffic:
+``` bash
+sudo ufw allow from 192.168.1.0/24 to any port nfs
+sudo ufw reload
+```
