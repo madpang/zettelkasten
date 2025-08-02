@@ -5,7 +5,7 @@
 @brief: A guide on how to setup a NFS server on a Ubuntu machine, and how to mount it from a macOS client.
 @date: [created: 2025-07-30, updated: 2025-08-02]
 @tag: [nfs, ubuntu, macos]
-@version: 0.6.0
+@version: 0.7.0
 ```
 
 # Setup NFS Server for Local Network File Sharing
@@ -19,43 +19,41 @@ This guide provides steps to set up a Network File System (NFS) server on a Ubun
 Suppose you are logging to the Ubuntu server as a non-root user---with *uid* `1000` and *gid* `1000`, and with sudo privilege---and you want to share a directory located at `/mnt/workspace/share` with your local network.
 
 1. Install the NFS server package on the Ubuntu machine:
-``` bash
+``` cmd @server
 sudo apt update
 sudo apt install nfs-kernel-server
 ```
 
 2. Create the directory to share
-```bash
+``` cmd @server
+sudo mkdir -p /mnt/workspace/share
 sudo mkdir -p /mnt/workspace/share
 ```
 
 3. Set the appropriate permissions for the shared directory:
-```bash
+``` cmd @server
 sudo chown $USER:$USER /mnt/workspace/share
 ```
 
 4. Configure the NFS exports by editing the `/etc/exports` file:
-   ```bash
-   sudo nano /etc/exports
-   ```
-   Add the following line to share the directory with the local network (replace `192.168.1.0/24` with your actual network):
-   ```
-   /mnt/workspace/share 192.168.1.0/24(rw,sync,no_subtree_check)
-   ```
+# replace `192.168.1.0/24` with your actual network):
+``` cmd @server
+echo "/mnt/workspace/share 192.168.1.0/24(rw,sync,no_subtree_check)" |  sudo tee -a /etc/exports
+```
 
 5. Export the shared directory:
-   ```bash
-   sudo exportfs -ra
-   ```
+``` cmd @server
+sudo exportfs -ra
+```
 
 6. Start the NFS server:
-   ```bash
-   sudo systemctl enable nfs-server
-   sudo systemctl start nfs-kernel-server
+``` cmd @server
+sudo systemctl enable nfs-server
+sudo systemctl start nfs-kernel-server
    ```
 
-NOTE, it you have a firewall enabled, you may need to allow NFS traffic:
-``` bash
+If you have a firewall enabled, you may need to allow NFS traffic:
+``` cmd @server
 sudo ufw allow from 192.168.1.0/24 to any port nfs
 sudo ufw reload
 ```
@@ -65,12 +63,12 @@ sudo ufw reload
 ### Connect from macOS
 
 You can mount an NFS share from macOS---macOS includes built-in support for NFS:
-``` bash
+``` cmd @client
 sudo mount -t nfs -o resvport 192.168.1.100:/mnt/workspace/share /mnt/nfs_share
 ```
 
 To unmount:
-```
+``` cmd @client
 sudo umount /mnt/nfs_share
 ```
 
@@ -82,23 +80,23 @@ Since I usually use my MacBook Pro as a portable work terminal, I often do not c
 ### Connect from Ubuntu
 
 To connect to a NFS server from a Ubuntu client, you first need to install NFS client software:
-``` bash
+``` cmd @client
 sudo apt install nfs-common
 ```
 
 Then mount the shared directory:
-``` bash
+``` cmd @client
 sudo mount 192.168.1.100:/mnt/workspace/share /mnt/nfs_share
 ```
 
 To unmount:
-```
+``` cmd @client
 sudo umount /mnt/nfs_share
 ```
 
 In a real world company project, your team may have a central NFS server, and you may want to mount the NFS share automatically at boot time.
 You can add an entry to the `/etc/fstab` file to ensure this:
-``` bash
+``` cmd @client
 echo "192.168.1.100:/mnt/workspace/share /mnt/nfs_share nfs defaults 0 0" | sudo tee -a /etc/fstab
 ```
 
