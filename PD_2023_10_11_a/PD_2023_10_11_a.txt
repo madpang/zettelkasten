@@ -1,14 +1,12 @@
-+++ header
+``` header
 @file: pd-wysheid/content/PD_2023_10_11_a/PD_2023_10_11_a.txt
 @title: Git in Practice | Day Two: Odyssey
 @author: madpang
 @brief: This is part 2 of a tutorial on Git, in documentary fiction style.
-@date:
-- created on 2023-10-11
-- updated on 2025-07-01
+@date: [created: 2023-10-11, updated: 2025-07-01]
 @tag: [git, fiction]
-@version: 0.1.2
-+++
+@version: 0.1.3
+```
 
 # Git in Practice | Day Two: Odyssey
 

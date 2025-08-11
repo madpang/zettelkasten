@@ -1,14 +1,12 @@
-+++ header
+``` header
 @file: zettelkasten/PD_2025_04_20_a/PD_2025_04_20_a.txt
 @title: Setup up a Ubuntu based server | Storage Configuration
 @author: madpang
 @brief: Configure Ubuntu Server 24.04 LTS on a Dell Precision T7910 Workstation.
-@date:
-- created on 2025-04-20
-- updated on 2025-07-13
+@date: [created: 2025-04-20, updated: 2025-07-13]
 @tags: [ubuntu, server, workstation, ugreen, dell]
-@version: 0.2.1
-+++
+@version: 0.2.2
+```
 
 # Setup up a Ubuntu based Server | Storage Configuration
 
@@ -23,7 +21,7 @@ By following the steps outlined here, you'll be able to configure a server with 
 - A logical volume (LVM) setup for OS and swap space for efficient memory management.
 
 The resulting storage layout after completing the configuration is as follows:
-+++ console
+``` console
 > lsblk
 NAME                      MAJ:MIN RM   SIZE RO TYPE   MOUNTPOINTS
 sda                         8:0    0   1.8T  0 disk   
@@ -49,7 +47,7 @@ nvme1n1                   259:1    0 953.9G  0 disk
 |-nvme3n1                   259:5  0 953.9G  0 disk   
   |-nvme3n1p1               259:6  0 953.9G  0 part   
   |-md0                     9:0    0   1.9T  0 raid10 /mnt/workspace
-+++
+```
 
 This configuration balances performance, reliability, and maintainability, making it suitable for R&D work setup.
 
@@ -59,7 +57,7 @@ This configuration balances performance, reliability, and maintainability, makin
 
 Download the OS image from the [Ubuntu official site](https://ubuntu.com/).
 Then create a bootable USB drive using the `dd` command:
-+++ console
+``` console
 # insert the USB flash to be used as OS installer
 # identify the name of the USB flash recognized by the OS
 > lsblk
@@ -72,7 +70,7 @@ sdd           8:0    1   233G  0 disk
 > sudo umount /dev/sdd1
 # write the Ubuntu installation ISO to the USB flash
 > sudo dd if=~/Downloads/ubuntu-24.04.1-desktop-amd64.iso of=/dev/sdd bs=4M status=progress
-+++
+```
 And there you go---yes, you do not need any third-party tools to create a bootable USB drive.
 Note, this process is also applicable to macOS, just remember that `diskutil` is your friend when you need to manipulate the USB flash.
 
@@ -85,7 +83,7 @@ Just remember to enable the LVM option.
 ### Configure the RAID enabled storage for workspace
 
 Before the RAID setup, the storage layout looks like this:
-+++ console
+``` console
 > lsblk -o NAME,SIZE,FSTYPE,TYPE,MOUNTPOINT
 NAME          SIZE    FSTYPE     TYPE    MOUNTPOINT
 # ...
@@ -93,7 +91,7 @@ nvme0n1       953.9G             disk
 nvme2n1       953.9G             disk 
 nvme1n1       953.9G             disk 
 nvme3n1       953.9G             disk 
-+++
+```
 
 I choose to set up a *RAID 10* array using the four NVMe disks, because:
 - RAID 1 provides high reliability through mirroring;
@@ -101,58 +99,58 @@ I choose to set up a *RAID 10* array using the four NVMe disks, because:
 - RAID 10 combines both advantages.
 
 To start, use `mdadm` to create the RAID array:
-+++ console
+``` console
 # create a primary partition spanning the entire space for each NVMe disk
 > for i in {0..3}; do sudo parted /dev/nvme${i}n1 --script mklabel gpt mkpart primary 0% 100% set 1 raid on; done
 # create the RAID 10 array
 > sudo mdadm --create --verbose /dev/md0 --level=10 --raid-devices=4 /dev/nvme[0123]n1p1
-+++
+```
 Note, the RAID array creation command might take a long time (in my case, it took about 2 hours).
 During the process, one can use `cat /proc/mdstat` to monitor the progress.
 
 After the finish of synthesizing `/dev/md0`, create a filesystem on it:
-+++ console
+``` console
 > sudo mkfs.ext4 /dev/md0
-+++
+```
 
 Mount the RAID enabled file system:
-+++ console
+``` console
 # create the mount point
 > sudo mkdir /mnt/workspace
 > sudo mount /dev/md0 /mnt/workspace
-+++
+```
 
 Note, the software-based RAID 10 array is managed by `mdadm`, which stores its configuration in each member disk's *superblock*, however, it is recommended to retrieve this configuration and save it in `/etc/mdadm/mdadm.conf`:
-+++ console
+``` console
 # create the configuration file
 > sudo mdadm --detail --scan | sudo tee -a /etc/mdadm/mdadm.conf
 # update the initramfs
 > sudo update-initramfs -u
-+++
+```
 
 ### Configure the storage for system backup
 
 A server should be stable; however, technology evolves rapidly, and sometimes I need to take the risk of experimenting with new ideas. To mitigate potential issues, I prefer a timestamped system snapshot mechanism that allows me to revert to a specific system state when needed.
 
 The storage configuration is straightforward:
-+++ console
+``` console
 # create a primary partition spanning the entire space of a SSD disk
 > sudo parted /dev/sda --script mklabel gpt mkpart ext4part ext4 0% 100%
 # create an `ext` Extended file system on it
 sudo mkfs.ext4 /dev/sda1
-+++
+```
 
 Mount the file system:
-+++ console
+``` console
 # create the mount point
 > sudo mkdir /mnt/timemachine
 > sudo mount /dev/sda1 /mnt/timemachine
-+++
+```
 
 Generate the first snapshot of the system state:
-+++ console
+``` console
 sudo rsync -aHAXv --numeric-ids --delete --exclude={"/dev/*","/proc/*","/sys/*","/tmp/*","/run/*","/mnt/*","/media/*","/lost+found"} / /mnt/timemachine/$(hostname)/$(date +%F_%H-%M)/
-+++
+```
 This command utilizes `rsync` to backup the root directory of the system to `/mnt/timemachine` (with dynamically generated time stamp), excluding the following directories:
 - `/dev/*`: Device files (e.g., hardware devices).
 - `/proc/*`: Kernel and process information (virtual filesystem).
@@ -176,22 +174,22 @@ The meaning of the options is:
 Although RAID 10 has been setup for `/mnt/workspace` to add a safety net for the *real asset* in modern digital life---the user data---but redundancy is not the same as backup.
 
 The storage configuration is similar to that for system file backup:
-+++ console
+``` console
 # create a primary partition spanning the entire space of a SSD disk
 > sudo parted /dev/sdb --script mklabel gpt mkpart ext4part ext4 0% 100%
 # create an `ext` Extended file system on it
 > sudo mkfs.ext4 /dev/sdb1
-+++
+```
 
 Mount the file system:
-+++ console
+``` console
 # create the mount point
 > sudo mkdir /mnt/backup
 > sudo mount /dev/sdb1 /mnt/backup
-+++
+```
 
 Perform the backup:
-+++ console
+``` console
 # create the folder for backup
 > sudo mkdir /mnt/backup/wksp.bak
 # change the ownership to the user for user data bacup
@@ -199,7 +197,7 @@ Perform the backup:
 > sudo chmod 750 /mnt/backup/wksp.bak
 # start the backup and show progress in standard output
 > rsync -ah --delete --progress --stats /mnt/workspace/wksp4/ /mnt/backup/wksp4.bak
-+++
+```
 The meaning of the options is:
 - `a`: Archive mode.
 - `h`: human-readable file sizes.
@@ -223,44 +221,44 @@ Because a swap partition is generally faster and more efficient than using a swa
 Besides, a swap space should generally have the same size as the physical RAM, and I have 256 GB of RAM on my server, so I need a swap space of 256 GB.
 
 After a fresh installation of Ubuntu Server 24.04 LTS, run the following command to check the default swap configuration:
-+++ console
+``` console
 > swapon --show
 NAME      TYPE SIZE USED PRIO
 /swap.img file   4G   0B   -2
-+++
+```
 I want to remove this swap file and create a swap partition instead.
 To remove the swap file:
-+++ console
+``` console
 # disable the swap file
 > sudo swapoff /swap.img
 # remove the swap file
 > sudo rm /swap.img
 # remove the swap entry from fstab -> see next section
-+++
+```
 
 To create a swap partition (note, I enabled LVM during the installation):
-+++ console
+``` console
 # create a logical volume for swap (size is specified in base 2^30)
 > sudo lvcreate -L 256G -n swap-lv ubuntu-vg
 # format it as swap
 > sudo mkswap /dev/ubuntu-vg/swap-lv
 # enable that swap, and one can check the swap status by `free -h` or `swapon --show`
 > sudo swapon /dev/ubuntu-vg/swap-lv
-+++
+```
 
 To make the new swap setup persistent across reboots, update the `/etc/fstab` file (use `sudo nano` to edit):
-+++ config-file
+``` config-file
 # ...
 # delete this line -> /dev/ubuntu-vg/swap-lv none swap sw 0 0
 # >>> add the following line
 /dev/disk/by-id/<replace-with-your-id> none swap sw 0 0
 # <<<
-+++
+```
 
 ### Configure the system to use the new storage layout
 
 To ensure that the new storage layout is used after reboot---i.e., automatically mounted---update the `/etc/fstab` file (use `sudo nano` to edit):
-+++ config-file
+``` config-file
 # /etc/fstab: static file system information.
 #
 # Use 'blkid' to print the universally unique identifier for a
@@ -275,7 +273,7 @@ To ensure that the new storage layout is used after reboot---i.e., automatically
 /dev/disk/by-uuid/<replace-with-your-device-uuid> /mnt/backup ext4 defaults,nofail 0 2
 /dev/disk/by-uuid/<replace-with-your-device-uuid> /mnt/timemachine ext4 defaults,nofail 0 2
 /dev/disk/by-uuid/<replace-with-your-device-uuid> /mnt/workspace ext4 defaults,nofail 0 2
-+++
+```
 
 ## Extra Notes
 
@@ -287,20 +285,20 @@ I find a better solution is to use a minimal capture card---an integrated device
 The minimal capture card may not be powerful enough for time time use due to thermal issue, but is especially fit for the server installation work, since you usually want to carry your own laptop.
 
 Once the OS is installed, you can go on with your cozy SSH connection---Ubuntu server usually has OpenSSH server installed by default, if not, you can install it with:
-+++ cmd
+``` cmd
 # install & launch ssh server
 sudo apt install -y openssh-server
 sudo systemctl enable ssh
 sudo systemctl start ssh
-+++
+```
 If you do not manually configure the IP address of the server, you can find it by `hostname -I`.
 
 ### Explanation of the some commands
 
 The following command uses `parted` to create a new partition table and a primary partition on the specified disk.
-+++ cmd
+``` cmd
 sudo parted /dev/sdb --script mklabel gpt mkpart ext4part ext4 0% 100%
-+++
+```
 The `--script` flag tells parted to run in non-interactive mode, executing all commands without prompting for user confirmation.
 The `mklabel gpt` command creates a new GPT (GUID Partition Table) on the disk, and the `mkpart ext4part ext4 0% 100%` command creates a primary partition that spans the entire disk, formatted as an ext4 filesystem, labeled as `ext4part`.
 Note:
